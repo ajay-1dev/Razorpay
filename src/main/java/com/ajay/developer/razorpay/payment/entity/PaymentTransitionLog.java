@@ -1,5 +1,6 @@
 package com.ajay.developer.razorpay.payment.entity;
 
+import com.ajay.developer.razorpay.common.entity.BaseEntity;
 import com.ajay.developer.razorpay.common.enums.PaymentEvent;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,8 +14,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "payment_transition_log")
-public class PaymentTransitionLog {
+@Table(name = "payment_transition_log",indexes = {
+        @Index(name = "idx_payment_transition_log_payment_id",columnList = "payment_id")
+})
+public class PaymentTransitionLog extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

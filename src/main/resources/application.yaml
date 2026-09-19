@@ -7,5 +7,13 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: true
+logging:
+  level:
+    com:
+      ajay:
+        developer:
+          razorpay: trace
+#  pattern:
+#   console: == [%level] == %d{yyyy-MM-dd HH:mm:ss} [%c] -----> %m/%n

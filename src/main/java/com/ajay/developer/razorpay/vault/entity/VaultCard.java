@@ -1,5 +1,6 @@
 package com.ajay.developer.razorpay.vault.entity;
 
+import com.ajay.developer.razorpay.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.cglib.core.Local;
@@ -14,7 +15,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "vault_card")
-public class VaultCard{
+public class VaultCard extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

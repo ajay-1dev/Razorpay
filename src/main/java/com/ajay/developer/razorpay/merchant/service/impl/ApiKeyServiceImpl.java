@@ -7,6 +7,7 @@ import com.ajay.developer.razorpay.merchant.dto.response.ApiKeyCreateResponce;
 import com.ajay.developer.razorpay.merchant.dto.response.ApiKeyResponce;
 import com.ajay.developer.razorpay.merchant.entity.ApiKey;
 import com.ajay.developer.razorpay.merchant.entity.Merchant;
+import com.ajay.developer.razorpay.merchant.mapper.ApiKeyResponceMapper;
 import com.ajay.developer.razorpay.merchant.repository.ApiKeyRepository;
 import com.ajay.developer.razorpay.merchant.repository.MerchantRepository;
 import com.ajay.developer.razorpay.merchant.service.ApiKeyService;
@@ -27,6 +28,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
     private final ApiKeyRepository apiKeyRepository;
     private final MerchantRepository merchantRepository;
+    private final ApiKeyResponceMapper apiKeyResponceMapper;
 
     @Override
     @Transactional
@@ -44,20 +46,23 @@ public class ApiKeyServiceImpl implements ApiKeyService {
                 .build();
         apiKeyRepository.save(apiKey);
         return new ApiKeyCreateResponce(apiKey.getId(),keyId,keySecret,apiKey.getEnvironment());
+
     }
 
     @Override
     public List<ApiKeyResponce> list(UUID merchantId){
         List<ApiKey> apiKeys = apiKeyRepository.findAllByMerchant_Id(merchantId);
-        List<ApiKeyResponce> apiKeyResponceList = apiKeys.stream()
-                .map(apiKey -> new ApiKeyResponce(apiKey.getId(),
-                apiKey.getKeyId(),
-                apiKey.getEnvironment(),
-                apiKey.getEnabled(),
-                apiKey.getLastUsedAt(),
-                apiKey.getCreatedAt()))
-                .toList();
-        return  apiKeyResponceList;
+//        List<ApiKeyResponce> apiKeyResponceList = apiKeys.stream()
+//                .map(apiKey -> new ApiKeyResponce(apiKey.getId(),
+//                apiKey.getKeyId(),
+//                apiKey.getEnvironment(),
+//                apiKey.getEnabled(),
+//                apiKey.getLastUsedAt(),
+//                apiKey.getCreatedAt()))
+//                .toList();
+//        return  apiKeyResponceList;
+        return apiKeyResponceMapper.toApiResponceList(apiKeys);
+
     }
 
 
@@ -90,5 +95,6 @@ public class ApiKeyServiceImpl implements ApiKeyService {
         apiKey.setGracePeriodExpiredAt(LocalDateTime.now().plusHours(24));
         apiKeyRepository.save(apiKey);
         return new ApiKeyCreateResponce(apiKey.getId(),apiKey.getKeyId(),keySecret,apiKey.getEnvironment());
+
     }
 }

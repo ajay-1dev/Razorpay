@@ -1,5 +1,6 @@
 package com.ajay.developer.razorpay.payment.entity;
 
+import com.ajay.developer.razorpay.common.entity.BaseEntity;
 import com.ajay.developer.razorpay.common.entity.Money;
 import com.ajay.developer.razorpay.common.enums.PaymentMethod;
 import com.ajay.developer.razorpay.common.enums.PaymentStatus;
@@ -18,16 +19,19 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "payment")
-public class Payment {
+@Table(name = "payment",indexes = {
+        @Index(name = "idx_payment_order_id",columnList = "order_id"),
+        @Index(name = "idx_payment_merchant_id",columnList = "merchant_id")
+})
+public class Payment extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY,optional = false)
-    @JoinColumn(name = "order_record", nullable = false)
-    private OrderRecord orderRecord;
+    @JoinColumn(name = "order_id", nullable = false)
+    private OrderRecord order;
 
     @Column(name = "merchant_id", nullable = false)
     private UUID merchantId;

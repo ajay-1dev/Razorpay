@@ -16,8 +16,8 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 public class BaseEntity {
 
-    @CreatedBy
-    private String name;
+//    @CreatedBy
+//    private String name;
 
     @CreatedDate
     private LocalDateTime createdAt;

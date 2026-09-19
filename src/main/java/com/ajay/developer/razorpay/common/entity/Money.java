@@ -1,10 +1,14 @@
 package com.ajay.developer.razorpay.common.entity;
 
 import jakarta.persistence.Embeddable;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Embeddable
-//@NoArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class Money {
     private int amountUnits;
     private String currency;

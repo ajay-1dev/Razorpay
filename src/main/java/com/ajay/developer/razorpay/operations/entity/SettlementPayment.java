@@ -1,5 +1,6 @@
 package com.ajay.developer.razorpay.operations.entity;
 
+import com.ajay.developer.razorpay.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

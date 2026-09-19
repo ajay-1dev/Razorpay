@@ -15,6 +15,12 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponce.error(ex.getErrorCode(), ex.getMessage()));
     }
 
+    @ExceptionHandler(BusinessRuleVoilationException.class)
+    public ResponseEntity<ErrorResponce> handleResourceNotFoundException(BusinessRuleVoilationException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ErrorResponce.error(ex.getErrorCode(), ex.getMessage()));
+    }
+
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ErrorResponce> handleDuplicateResourceException(DuplicateResourceException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)

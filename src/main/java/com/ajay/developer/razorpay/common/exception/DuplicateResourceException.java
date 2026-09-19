@@ -6,7 +6,7 @@ import lombok.Getter;
 public class DuplicateResourceException extends RuntimeException{
     private final String errorCode;
     public DuplicateResourceException(String errorCode,String message) {
-        this.errorCode = errorCode;
+        this.errorCode = errorCode.toUpperCase();
         super(message);
     }
 }
