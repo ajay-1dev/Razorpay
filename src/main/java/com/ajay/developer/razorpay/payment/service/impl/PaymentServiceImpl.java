@@ -5,7 +5,7 @@ import com.ajay.developer.razorpay.common.enums.PaymentEvent;
 import com.ajay.developer.razorpay.common.enums.PaymentStatus;
 import com.ajay.developer.razorpay.common.exception.BusinessRuleVoilationException;
 import com.ajay.developer.razorpay.common.exception.ResourceNotFoundException;
-import com.ajay.developer.razorpay.payment.Settlement.PaymentSettlementService;
+import com.ajay.developer.razorpay.payment.Settlement.PaymentTransitionService;
 import com.ajay.developer.razorpay.payment.dto.request.PaymentInitRequest;
 import com.ajay.developer.razorpay.payment.dto.responce.PaymentResponce;
 import com.ajay.developer.razorpay.payment.entity.OrderRecord;
@@ -34,7 +34,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentGatewayRouter paymentGatewayRouter;
     private final PaymentMapper paymentMapper;
-    private final PaymentSettlementService paymentSettlementService;
+    private final PaymentTransitionService paymentSettlementService;
 
     @Override
     @Transactional

@@ -2,7 +2,6 @@ package com.ajay.developer.razorpay.payment.Settlement;
 
 import com.ajay.developer.razorpay.common.enums.PaymentEvent;
 import com.ajay.developer.razorpay.common.enums.PaymentStatus;
-import com.ajay.developer.razorpay.common.exception.InvalidStateTransitionException;
 import com.ajay.developer.razorpay.payment.entity.Payment;
 import com.ajay.developer.razorpay.payment.entity.PaymentTransitionLog;
 import com.ajay.developer.razorpay.payment.repository.PaymentTransitionLogRepository;
@@ -15,7 +14,7 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PaymentSettlementService {
+public class PaymentTransitionService {
     private final PaymentTransitionLogRepository paymentTransitionLogRepository;
     private final PaymentStatemachine paymentStatemachine;
 
