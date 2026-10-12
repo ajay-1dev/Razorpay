@@ -16,6 +16,8 @@ import com.ajay.developer.razorpay.payment.repository.PaymentRepository;
 import com.ajay.developer.razorpay.payment.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +27,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+//@Transactional(readOnly = true)
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRecordRepository orderRecordRepository;
@@ -37,6 +39,7 @@ public class OrderServiceImpl implements OrderService {
     private int defaultOrderExpiryMinutes;
 
     @Override
+//    @CachePut(cacheNames = "orders",key = "{#merchantId,#result.id}")
     public OrderResponce create(UUID merchantId, CreateOrderRequest createOrderRequest) {
         if(createOrderRequest.receipt() != null && orderRecordRepository.existsByMerchantIdAndReceipt(merchantId,createOrderRequest.receipt())){
             throw new DuplicateResourceException("ORDER_RECEIVED_DUPLICATE","Order with receipt already exists: "+createOrderRequest.receipt());
@@ -63,6 +66,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+//    @Cacheable(cacheNames = "orders",key = "{#merchantId,#orderId}")
     public OrderResponce getById(UUID merchantId, UUID orderId) {
         OrderRecord orderRecord = orderRecordRepository.findByIdAndMerchantId(orderId,merchantId)
                 .orElseThrow(() -> new ResourceNotFoundException("ORDER-NOT EXITS WITH",orderId.toString()));
@@ -81,6 +85,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+//    @CachePut(cacheNames = "orders",key = "{#merchantId,#orderId}")
     public OrderResponce cancel(UUID merchantId, UUID orderId) {
         OrderRecord orderRecord = orderRecordRepository.findByIdAndMerchantId(orderId,merchantId)
                 .orElseThrow(() -> new ResourceNotFoundException("ORDER-NOT EXITS WITH",orderId.toString()));
