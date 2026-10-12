@@ -1,5 +1,4 @@
 package com.ajay.developer.razorpay.payment.processor.strategy;
-
 import com.ajay.developer.razorpay.common.util.RandomizerUtil;
 import com.ajay.developer.razorpay.payment.processor.PaymentProcessor;
 import com.ajay.developer.razorpay.payment.processor.dto.request.PaymentProcessorRequest;
@@ -27,6 +26,6 @@ public class NetbankingPaymentProcessor implements PaymentProcessor {
 
         String redirectRef = "http://randomlink.com"+processorRef;
 
-        return new PaymentProcessorResponce.Success(processorRef, redirectRef);
+        return new PaymentProcessorResponce.Pending(processorRef);
     }
 }

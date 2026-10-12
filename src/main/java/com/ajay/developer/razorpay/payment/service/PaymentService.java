@@ -1,6 +1,5 @@
 package com.ajay.developer.razorpay.payment.service;
 
-import com.ajay.developer.razorpay.common.enums.PaymentMethod;
 import com.ajay.developer.razorpay.payment.dto.request.PaymentInitRequest;
 import com.ajay.developer.razorpay.payment.dto.responce.PaymentResponce;
 
@@ -12,4 +11,6 @@ public interface PaymentService {
 
 
     PaymentResponce capture(UUID merchantId, UUID paymentId);
+
+    void resolveAuthorizing(UUID PaymentId, boolean approve, String bankRef, String errorCode, String errorDescription);
 }

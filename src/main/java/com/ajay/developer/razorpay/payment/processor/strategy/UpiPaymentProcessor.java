@@ -25,6 +25,5 @@ public class UpiPaymentProcessor implements PaymentProcessor {
         String processorRef = "UPI_PROCESSOR"+ RandomizerUtil.randomBase64(16);
 
         String bankRef = "BANK_REF"+ RandomizerUtil.randomBase64(16);
-
-        return new PaymentProcessorResponce.Success(processorRef, bankRef);
+        return new PaymentProcessorResponce.Pending(processorRef);
     }}

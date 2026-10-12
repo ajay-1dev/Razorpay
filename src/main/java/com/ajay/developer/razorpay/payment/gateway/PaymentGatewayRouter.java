@@ -13,7 +13,7 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class PaymentGatewayRouter {
-    private Map<PaymentMethod,PaymentAdapter> paymentAdapterConfig;
+    private final Map<PaymentMethod,PaymentAdapter> paymentAdapterConfig;
     public PaymentResult initiate(PaymentRequest paymentRequest) {
 
         PaymentAdapter paymentAdapter = paymentAdapterConfig.get(paymentRequest.method());
