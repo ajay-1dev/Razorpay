@@ -2,13 +2,23 @@ spring:
   application:
     name: razorpay
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${DB_URL:}
+    username: ${DB_USERNAME:}
+    password: ${DB_PASSWORD:}
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
+
+#  security:
+#    user:
+#      name: admin
+#      password: admin123
 logging:
   level:
     com:
@@ -17,3 +27,34 @@ logging:
           razorpay: trace
 #  pattern:
 #   console: == [%level] == %d{yyyy-MM-dd HH:mm:ss} [%c] -----> %m/%n
+
+payment:
+  simulator:
+    poll-interval-ms: 5000
+    chaos-mode: NORMAL
+    methods:
+      CARD:
+        min-delay-seconds: 2
+        max-delay-seconds: 6
+        sucess-rate: 90
+      UPI:
+        min-delay-seconds: 1
+        max-delay-seconds: 3
+        sucess-rate: 95
+      NET_BANKING:
+        min-delay-seconds: 4
+        max-delay-seconds: 10
+        sucess-rate: 80
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+app:
+  rate-limit:
+    method: fixed
+    use-case:
+      api-key:
+        api-per-minute: 2
