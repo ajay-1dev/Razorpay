@@ -1,9 +1,11 @@
 package com.ajay.developer.razorpay.merchant.mapper;
 
+import com.ajay.developer.razorpay.merchant.cache.ApiKeyCacheEntry;
 import com.ajay.developer.razorpay.merchant.dto.response.ApiKeyCreateResponce;
 import com.ajay.developer.razorpay.merchant.dto.response.ApiKeyResponce;
 import com.ajay.developer.razorpay.merchant.entity.ApiKey;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
 import java.util.List;
@@ -16,6 +18,9 @@ public interface ApiKeyResponceMapper {
     List<ApiKeyResponce> toApiResponceList(List<ApiKey> apiKeyList);
 
     ApiKeyCreateResponce toApiKeyCreateResponce(ApiKey apiKey);
+
+    @Mapping(target = "merchantId", source = "merchant.id")
+    ApiKeyCacheEntry toApiKeyCacheEntry(ApiKey apiKey);
 
 
 

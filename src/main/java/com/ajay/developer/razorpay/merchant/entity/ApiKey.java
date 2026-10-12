@@ -52,9 +52,15 @@ public class ApiKey extends BaseEntity {
 
     private LocalDateTime lastUsedAt;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime rotatedKeyCreatedAt;
 
     private LocalDateTime rotatedAt;
 
     private LocalDateTime gracePeriodExpiredAt;
+
+
+
+    public boolean isInGracePeriod() {
+        return gracePeriodExpiredAt != null && gracePeriodExpiredAt.isBefore(LocalDateTime.now());
+    }
 }

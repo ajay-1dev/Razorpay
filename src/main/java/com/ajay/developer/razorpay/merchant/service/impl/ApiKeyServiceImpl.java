@@ -2,6 +2,7 @@ package com.ajay.developer.razorpay.merchant.service.impl;
 
 import com.ajay.developer.razorpay.common.exception.ResourceNotFoundException;
 import com.ajay.developer.razorpay.common.util.RandomizerUtil;
+import com.ajay.developer.razorpay.merchant.cache.ApiKeyCache;
 import com.ajay.developer.razorpay.merchant.dto.request.CreateApiKeyRequest;
 import com.ajay.developer.razorpay.merchant.dto.response.ApiKeyCreateResponce;
 import com.ajay.developer.razorpay.merchant.dto.response.ApiKeyResponce;
@@ -13,6 +14,9 @@ import com.ajay.developer.razorpay.merchant.repository.MerchantRepository;
 import com.ajay.developer.razorpay.merchant.service.ApiKeyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +33,8 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     private final ApiKeyRepository apiKeyRepository;
     private final MerchantRepository merchantRepository;
     private final ApiKeyResponceMapper apiKeyResponceMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final ApiKeyCache apiKeyCache;
 
     @Override
     @Transactional
@@ -42,7 +48,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
                 .merchant(merchant)
                 .environment(createApiKeyRequest.environment())
                 .keyId(keyId)
-                .keySecretHash(keySecret)
+                .keySecretHash(passwordEncoder.encode(keySecret))
                 .build();
         apiKeyRepository.save(apiKey);
         return new ApiKeyCreateResponce(apiKey.getId(),keyId,keySecret,apiKey.getEnvironment());
@@ -74,6 +80,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
                 .orElseThrow(() -> new ResourceNotFoundException("merchant_not found","".valueOf(merchantId)));
         apiKey.setEnabled(false);
         apiKeyRepository.save(apiKey);
+        apiKeyCache.evict(apiKey.getKeyId());
     }
 
     @Override
@@ -90,10 +97,11 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
         apiKey.setPreviousKeySecretHash(apiKey.getKeySecretHash());
         String keySecret = RandomizerUtil.randomBase64(40);
-        apiKey.setKeySecretHash(keySecret);
+        apiKey.setKeySecretHash(passwordEncoder.encode(keySecret));
         apiKey.setRotatedAt(LocalDateTime.now());
         apiKey.setGracePeriodExpiredAt(LocalDateTime.now().plusHours(24));
         apiKeyRepository.save(apiKey);
+        apiKeyCache.evict(apiKey.getKeyId());
         return new ApiKeyCreateResponce(apiKey.getId(),apiKey.getKeyId(),keySecret,apiKey.getEnvironment());
 
     }
