@@ -3,18 +3,26 @@ package com.ajay.developer.razorpay.merchant.service.impl;
 import com.ajay.developer.razorpay.common.enums.MerchantStatus;
 import com.ajay.developer.razorpay.common.enums.UserRole;
 import com.ajay.developer.razorpay.common.exception.DuplicateResourceException;
+import com.ajay.developer.razorpay.merchant.dto.request.LoginRequest;
 import com.ajay.developer.razorpay.merchant.dto.request.MerchantSignupRequest;
+import com.ajay.developer.razorpay.merchant.dto.response.LoginResponce;
 import com.ajay.developer.razorpay.merchant.dto.response.MerchantResponse;
 import com.ajay.developer.razorpay.merchant.entity.AppUser;
 import com.ajay.developer.razorpay.merchant.entity.Merchant;
 import com.ajay.developer.razorpay.merchant.mapper.MerchantResponceMapper;
 import com.ajay.developer.razorpay.merchant.repository.AppUserRepository;
 import com.ajay.developer.razorpay.merchant.repository.MerchantRepository;
+import com.ajay.developer.razorpay.merchant.security.JwtUtil;
 import com.ajay.developer.razorpay.merchant.service.AuthService;
+import io.jsonwebtoken.Claims;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,6 +33,9 @@ public class AuthServiceImpl implements AuthService {
     private final AppUserRepository appUserRepository;
     private final MerchantRepository merchantRepository;
     private final MerchantResponceMapper  merchantResponceMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
 
     @Override
     @Transactional
@@ -46,11 +57,19 @@ public class AuthServiceImpl implements AuthService {
         AppUser appUser = AppUser.builder()
                 .email(merchantSignupRequest.email())
                 .merchant(merchant)
-                .passwordHash(merchantSignupRequest.password())
+                .passwordHash(passwordEncoder.encode(merchantSignupRequest.password()))
                 .role(UserRole.OWNER)
                           .build();
         appUserRepository.save(appUser);
 //        return new MerchantResponse(merchant.getId(),merchant.getName(),merchant.getEmail(),merchant.getBusinessName(),merchant.getBusinessType(),merchant.getStatus());
         return merchantResponceMapper.toMerchantResponce(merchant);
+    }
+
+    @Override
+    public LoginResponce login(LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.email(),loginRequest.password()));
+        AppUser appUser = (AppUser) authentication.getPrincipal();
+        String accessToken = jwtUtil.generateAceesToken(appUser.getEmail(),appUser.getMerchant().getId(),appUser.getRole().name());
+        return new LoginResponce(accessToken);
     }
 }

@@ -1,5 +1,7 @@
 package com.ajay.developer.razorpay.merchant.controller;
 
+import com.ajay.developer.razorpay.merchant.dto.request.LoginRequest;
+import com.ajay.developer.razorpay.merchant.dto.response.LoginResponce;
 import com.ajay.developer.razorpay.merchant.dto.response.MerchantResponse;
 import com.ajay.developer.razorpay.merchant.dto.request.MerchantSignupRequest;
 import com.ajay.developer.razorpay.merchant.service.AuthService;
@@ -20,5 +22,11 @@ public class AuthController {
     public ResponseEntity<MerchantResponse> signUp(@RequestBody  @Valid MerchantSignupRequest merchantSignupRequest) {
         MerchantResponse merchantResponse = authService.signUp(merchantSignupRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(merchantResponse);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponce> login(@RequestBody  @Valid LoginRequest loginRequest) {
+        LoginResponce token = authService.login(loginRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 }
