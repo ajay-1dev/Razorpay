@@ -54,7 +54,7 @@ management:
 
 app:
   rate-limit:
-    method: fixed
+    method: bucket
     use-case:
       api-key:
         api-per-minute: 2
