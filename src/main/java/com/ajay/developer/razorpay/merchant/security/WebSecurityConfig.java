@@ -1,5 +1,6 @@
 package com.ajay.developer.razorpay.merchant.security;
 
+import com.ajay.developer.razorpay.common.idempotency.IdempotencyFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,7 @@ public class WebSecurityConfig {
     private static final String[] API_KEY_ROUTES = {"/v1/orders/**","/v1/payments/**","/v1/vault/**"};
     private final JwtMerchantContextFilter jwtMerchantContextFilter;
     private final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
+    private final IdempotencyFilter idempotencyFilter;
 
 
     @Bean
@@ -30,6 +32,7 @@ public class WebSecurityConfig {
                     .anyRequest().authenticated();
         }).csrf(crsf -> crsf.disable())
                 .addFilterBefore(jwtMerchantContextFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(idempotencyFilter, JwtMerchantContextFilter.class)
 //                .formLogin(formLogin -> formLogin.disable())
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
@@ -44,6 +47,7 @@ public class WebSecurityConfig {
                            .anyRequest().authenticated();
                 }).csrf(crsf -> crsf.disable())
                 .addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(idempotencyFilter, ApiKeyAuthenticationFilter.class)
 //                .formLogin(formLogin -> formLogin.disable())
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();

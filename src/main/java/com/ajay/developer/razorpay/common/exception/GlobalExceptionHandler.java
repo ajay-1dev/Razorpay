@@ -83,6 +83,17 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(IdempotencyConflictException.class)
+    public ResponseEntity<ErrorResponce> handleIdempotencyConfliictException(JwtException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body( ErrorResponce.error(
+                        "Idempotency_error".toUpperCase(),
+                        ex.getMessage()
+                ));
+    }
+
     @ExceptionHandler(RateLimitException.class)
     public ResponseEntity<ErrorResponce> handleRateLimitException(RateLimitException ex) {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
