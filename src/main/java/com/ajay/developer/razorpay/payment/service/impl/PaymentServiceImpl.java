@@ -17,10 +17,12 @@ import com.ajay.developer.razorpay.payment.mapper.PaymentMapper;
 import com.ajay.developer.razorpay.payment.repository.OrderRecordRepository;
 import com.ajay.developer.razorpay.payment.repository.PaymentRepository;
 import com.ajay.developer.razorpay.payment.service.PaymentService;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -37,9 +39,13 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentTransitionService paymentTransitionService;
 
     @Override
-    @Transactional
+//    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Transactional()
     public PaymentResponce initiate(UUID merchantId, PaymentInitRequest paymentInitRequest) {
-        OrderRecord orderRecord = orderRecordRepository.findByIdAndMerchantId(paymentInitRequest.orderId(), merchantId)
+//        OrderRecord orderRecord = orderRecordRepository.findByIdAndMerchantId(paymentInitRequest.orderId(), merchantId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Invalid Order Record","".valueOf(paymentInitRequest.orderId())));
+
+        OrderRecord orderRecord = orderRecordRepository.findByIdAndMerchantIdForUpdate(paymentInitRequest.orderId(), merchantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid Order Record","".valueOf(paymentInitRequest.orderId())));
 
         if(orderRecord.getOrderStatus() != OrderStatus.CREATED && orderRecord.getOrderStatus() != OrderStatus.ATTEMPTED){
@@ -85,10 +91,12 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    @Transactional
+    @Transactional()
     public PaymentResponce capture(UUID merchantId, UUID paymentId) {
 
-        Payment payment = paymentRepository.findByIdAndMerchantId(paymentId,merchantId)
+//        Payment payment = paymentRepository.findByIdAndMerchantId(paymentId,merchantId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Invalid Payment Record","".valueOf(paymentId)));
+        Payment payment = paymentRepository.findByIdAndMerchantIdForUpdate(paymentId,merchantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid Payment Record","".valueOf(paymentId)));
 
         //payment.setStatus(PaymentStatus.CAPTURING);
@@ -115,7 +123,10 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public void resolveAuthorizing(UUID PaymentId, boolean approve, String bankRef, String errorCode, String errorDescription) {
 
-        Payment payment = paymentRepository.findById(PaymentId)
+//        Payment payment = paymentRepository.findById(PaymentId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Invalid Payment Record","".valueOf(PaymentId)));
+
+        Payment payment = paymentRepository.findByIdForUpdate(PaymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid Payment Record","".valueOf(PaymentId)));
 
         if(payment.getStatus() !=  PaymentStatus.AUTHORIZING){
