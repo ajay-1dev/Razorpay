@@ -1,5 +1,6 @@
 package com.ajay.developer.razorpay.payment.service.impl;
 
+import com.ajay.developer.razorpay.common.enums.EventAggregateType;
 import com.ajay.developer.razorpay.common.enums.OrderStatus;
 import com.ajay.developer.razorpay.common.exception.BusinessRuleVoilationException;
 import com.ajay.developer.razorpay.common.exception.DuplicateResourceException;
@@ -11,6 +12,7 @@ import com.ajay.developer.razorpay.payment.entity.OrderRecord;
 import com.ajay.developer.razorpay.payment.entity.Payment;
 import com.ajay.developer.razorpay.payment.mapper.OrderMapper;
 import com.ajay.developer.razorpay.payment.mapper.PaymentMapper;
+import com.ajay.developer.razorpay.payment.outbox.OutboxEventPublisher;
 import com.ajay.developer.razorpay.payment.repository.OrderRecordRepository;
 import com.ajay.developer.razorpay.payment.repository.PaymentRepository;
 import com.ajay.developer.razorpay.payment.service.OrderService;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -34,6 +37,7 @@ public class OrderServiceImpl implements OrderService {
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
     private final OrderMapper orderMapper;
+    private final OutboxEventPublisher  eventPublisher;
 
     @Value("${orderexpiryminutes:30}")
     private int defaultOrderExpiryMinutes;
@@ -54,15 +58,24 @@ public class OrderServiceImpl implements OrderService {
                 .build();
         orderRecord = orderRecordRepository.save(orderRecord);
 
-    return new OrderResponce(orderRecord.getId()
-            ,orderRecord.getMerchantId(),
-            orderRecord.getReceipt(),
-            orderRecord.getAmount(),
-            orderRecord.getOrderStatus(),
-            orderRecord.getAttempts(),
-            orderRecord.getNotes(),
-            orderRecord.getExpiresAt(),
-            null);
+        eventPublisher.publish(EventAggregateType.ORDER,orderRecord.getId()
+                ,"ORDER_CREATED",Map.of("orderId",orderRecord.getId(),
+                        "merchantId",merchantId.toString(),
+                        "orderStatus",orderRecord.getOrderStatus().name(),
+                        "amountUnits",orderRecord.getAmount().getAmountUnits(),
+                        "amountCurrency",orderRecord.getAmount().getCurrency())
+                );
+
+//    return new OrderResponce(orderRecord.getId()
+//            ,orderRecord.getMerchantId(),
+//            orderRecord.getReceipt(),
+//            orderRecord.getAmount(),
+//            orderRecord.getOrderStatus(),
+//            orderRecord.getAttempts(),
+//            orderRecord.getNotes(),
+//            orderRecord.getExpiresAt(),
+//            null);
+        return orderMapper.orderToOrderResponce(orderRecord);
     }
 
     @Override
@@ -103,6 +116,14 @@ public class OrderServiceImpl implements OrderService {
 //                orderRecord.getNotes(),
 //                orderRecord.getExpiresAt(),
 //                null);
+
+        eventPublisher.publish(EventAggregateType.ORDER,orderRecord.getId()
+                ,"ORDER_CANCELLED",Map.of("orderId",orderRecord.getId(),
+                        "merchantId",merchantId.toString(),
+                        "orderStatus",orderRecord.getOrderStatus().name(),
+                        "amountUnits",orderRecord.getAmount().getAmountUnits(),
+                        "amountCurrency",orderRecord.getAmount().getCurrency())
+        );
         return orderMapper.orderToOrderResponce(orderRecord);
     }
 

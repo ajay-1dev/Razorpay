@@ -1,5 +1,6 @@
 package com.ajay.developer.razorpay.payment.service.impl;
 
+import com.ajay.developer.razorpay.common.enums.EventAggregateType;
 import com.ajay.developer.razorpay.common.enums.OrderStatus;
 import com.ajay.developer.razorpay.common.enums.PaymentEvent;
 import com.ajay.developer.razorpay.common.enums.PaymentStatus;
@@ -14,6 +15,7 @@ import com.ajay.developer.razorpay.payment.gateway.PaymentGatewayRouter;
 import com.ajay.developer.razorpay.payment.gateway.dto.PaymentRequest;
 import com.ajay.developer.razorpay.payment.gateway.dto.PaymentResult;
 import com.ajay.developer.razorpay.payment.mapper.PaymentMapper;
+import com.ajay.developer.razorpay.payment.outbox.OutboxEventPublisher;
 import com.ajay.developer.razorpay.payment.repository.OrderRecordRepository;
 import com.ajay.developer.razorpay.payment.repository.PaymentRepository;
 import com.ajay.developer.razorpay.payment.service.PaymentService;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -37,6 +40,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentGatewayRouter paymentGatewayRouter;
     private final PaymentMapper paymentMapper;
     private final PaymentTransitionService paymentTransitionService;
+    private final OutboxEventPublisher eventPublisher;
 
     @Override
 //    @Transactional(isolation = Isolation.REPEATABLE_READ)
@@ -87,6 +91,16 @@ public class PaymentServiceImpl implements PaymentService {
         }
         payment = paymentRepository.save(payment);
         orderRecordRepository.save(orderRecord);
+        eventPublisher.publish(EventAggregateType.PAYMENT, payment.getId(), "PAYMENT_CREATED",
+                Map.of("orderId", orderRecord.getId().toString(),
+                        "paymentId", payment.getId().toString(),
+                        "merchantId", merchantId.toString(),
+                        "paymentStatus", payment.getStatus().name(),
+                        "amountUnits", orderRecord.getAmount().getAmountUnits(),
+                        "amountCurrency", orderRecord.getAmount().getCurrency(),
+                        "paymentMethod", payment.getMethod()
+                )
+        );
         return paymentMapper.toResponce(payment);
     }
 
@@ -115,6 +129,17 @@ public class PaymentServiceImpl implements PaymentService {
             log.warn("Payment failed paymentId : {}", paymentId);
         }
         payment = paymentRepository.save(payment);
+
+        eventPublisher.publish(EventAggregateType.PAYMENT, payment.getId(), "PAYMENT_STATUS_CHANGED",
+                Map.of("orderId", payment.getOrder().getId().toString(),
+                        "paymentId", payment.getId().toString(),
+                        "merchantId", merchantId.toString(),
+                        "paymentStatus", payment.getStatus().name(),
+                        "amountUnits", payment.getAmount().getAmountUnits(),
+                        "amountCurrency", payment.getAmount().getCurrency(),
+                        "paymentMethod", payment.getMethod()
+                )
+        );
 
         return paymentMapper.toResponce(payment);
     }
@@ -164,6 +189,17 @@ public class PaymentServiceImpl implements PaymentService {
 
         paymentRepository.save(payment);
         orderRecordRepository.save(orderRecord);
+
+        eventPublisher.publish(EventAggregateType.PAYMENT, payment.getId(), "PAYMENT_STATUS_CHANGED",
+                Map.of("orderId", payment.getOrder().getId().toString(),
+                        "paymentId", payment.getId().toString(),
+                        "merchantId", payment.getMerchantId().toString(),
+                        "paymentStatus", payment.getStatus().name(),
+                        "amountUnits", payment.getAmount().getAmountUnits(),
+                        "amountCurrency", payment.getAmount().getCurrency(),
+                        "paymentMethod", payment.getMethod()
+                )
+        );
 
 
 
