@@ -76,7 +76,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         ApiKeyCacheEntry apiKeyCacheEntry = apiKeyCache.get(keyId)
                 .orElseGet(() -> loadAndGet(keyId));
 
-        if (apiKeyCache == null || !apiKeyCacheEntry.enabled()|| !secretMatches(rawSecret, apiKeyCacheEntry)) {
+        if (apiKeyCacheEntry == null || !apiKeyCacheEntry.enabled()|| !secretMatches(rawSecret, apiKeyCacheEntry)) {
             throw new BadCredentialsException("Invaild or missing api key");
         }
 

@@ -18,6 +18,7 @@ public class RazorpayApplication {
 		Dotenv dotenv = Dotenv.configure().ignoreIfMissing().systemProperties().load();
 		SpringApplication.run(RazorpayApplication.class, args);
 		//System.out.println("Razorpay Application Started");
+
 	}
 
 }

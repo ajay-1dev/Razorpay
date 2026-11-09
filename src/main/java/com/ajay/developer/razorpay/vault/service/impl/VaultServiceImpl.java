@@ -1,11 +1,9 @@
 package com.ajay.developer.razorpay.vault.service.impl;
 
-import com.ajay.developer.razorpay.common.entity.CardExpiryCheck;
 import com.ajay.developer.razorpay.common.entity.Money;
 import com.ajay.developer.razorpay.common.enums.CardBrand;
 import com.ajay.developer.razorpay.common.exception.ResourceNotFoundException;
 import com.ajay.developer.razorpay.common.util.RandomizerUtil;
-import com.ajay.developer.razorpay.payment.processor.PaymentProcessor;
 import com.ajay.developer.razorpay.payment.processor.PaymentProcessorRouter;
 import com.ajay.developer.razorpay.payment.processor.dto.request.PaymentProcessorRequest;
 import com.ajay.developer.razorpay.payment.processor.dto.responce.PaymentProcessorResponce;
@@ -20,7 +18,6 @@ import com.ajay.developer.razorpay.vault.service.VaultService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.encrypt.BytesEncryptor;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Service;
@@ -36,7 +33,7 @@ import java.util.UUID;
 public class VaultServiceImpl implements VaultService {
     private final CardTokenRepository cardTokenRepository;
     private final VaultCardRepository vaultCardRepository;
-    private final BytesEncryptor dekEncryptor;
+    private final BytesEncryptor masterKeyEncryptor;
     private final PaymentProcessorRouter paymentProcessorRouter;
     @Override
     @Transactional
@@ -47,7 +44,7 @@ public class VaultServiceImpl implements VaultService {
         byte[] dek = KeyGenerators.secureRandom(32).generateKey();
         byte[] encryptedPan = VaultEncryptionConfig.panEncryptor(dek)
                 .encrypt(tokenizeRequest.pan().getBytes(StandardCharsets.UTF_8));
-        byte[] encryptedDek = dekEncryptor.encrypt(dek);
+        byte[] encryptedDek = masterKeyEncryptor.encrypt(dek);
 
 
         VaultCard vaultCard= VaultCard.builder()
@@ -90,7 +87,7 @@ public class VaultServiceImpl implements VaultService {
         try {
             CardToken cardToken = cardTokenRepository.findByTokenAndRevokedAtIsNull(token).orElseThrow(() -> new ResourceNotFoundException("token", token));
             VaultCard vaultCard = cardToken.getVaultCard();
-            byte[] dek = dekEncryptor.decrypt(vaultCard.getEncryptedDek());
+            byte[] dek = masterKeyEncryptor.decrypt(vaultCard.getEncryptedDek());
             panBytes = VaultEncryptionConfig.panEncryptor(dek)
                     .decrypt(vaultCard.getEncryptedPan());
             String pan = new String(panBytes, StandardCharsets.UTF_8);

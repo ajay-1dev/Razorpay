@@ -28,7 +28,7 @@ public class VaultEncryptionConfig {
     }
 
     @Bean
-    public  BytesEncryptor dekEncryptor(){
+    public  BytesEncryptor masterKeyEncryptor(){
         byte[] masterKeyBytes = Base64.getDecoder().decode(MasterKey);
         SecretKeySpec masterDekKey = new SecretKeySpec(masterKeyBytes, "AES");
         return new AesBytesEncryptor(masterDekKey,KeyGenerators.secureRandom(12), AesBytesEncryptor.CipherAlgorithm.GCM);

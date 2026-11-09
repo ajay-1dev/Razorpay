@@ -33,6 +33,7 @@ public class IdempotencyFilter extends OncePerRequestFilter {
     private static final Set<String> GUARDED_METHODS = Set.of("POST", "PUT", "PATCH");
     private static final Duration IN_PROGRESS_TTL = Duration.ofSeconds(30);
     private static final Duration COMPLETED_TTL = Duration.ofHours(24);
+
     private static final String SEPARATOR = "|";
 
     private final MerchantContext merchantContext;
